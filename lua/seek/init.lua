@@ -9,13 +9,6 @@ local default = function(val, default_val)
   return val
 end
 
---- @param tbl table
---- @param ... any
-local tbl_get = function(tbl, ...)
-  if tbl == nil then return nil end
-  return vim.tbl_get(tbl, ...)
-end
-
 local get_key = function()
   local ok, char = pcall(vim.fn.getchar)
   if not ok then return { type = "error", char = nil, } end
@@ -46,16 +39,25 @@ local lower_case = ("abcdefghijklmnopqrstuvwxyz")
 local labels = vim.split(lower_case .. lower_case:upper(), "")
 
 -- TODO
--- opts for case (in)sensitive
 -- handle when the first key is the last char in the line - what's the second key
 -- search on the current line?
+-- avoid searching where the cursor is
 
 local M = {}
 
 --- @class SeekOpts
 --- @field direction "before"|"after"
+--- @field case_sensitive? boolean
 --- @param opts SeekOpts
 M.seek = function(opts)
+  if opts == nil then
+    return notify(vim.log.levels.ERROR, "seek.opts is a required param")
+  end
+  if opts.direction ~= "before" and opts.direction ~= "after" then
+    return notify(vim.log.levels.ERROR, "seek.opts.direction must be 'before' or 'after'")
+  end
+  local case_sensitive = default(vim.tbl_get(opts, "case_sensitive"), false)
+
   local first_key = get_key()
   if first_key.type == "error" then
     notify(vim.log.levels.INFO, "Exiting after key 1")
@@ -69,6 +71,9 @@ M.seek = function(opts)
   end
 
   local keys = first_key.char .. second_key.char
+  if not case_sensitive then
+    keys = keys:lower()
+  end
 
   --- @class Match
   --- @field row_0i number
@@ -94,10 +99,13 @@ M.seek = function(opts)
   end)()
 
   for line_idx_1i, line in ipairs(lines) do
-    local plain = true
+    if not case_sensitive then
+      line = line:lower()
+    end
 
     local idx_1i = 1
     while true do
+      local plain = true
       local start_col_1i, end_col_1i = line:find(keys, idx_1i, plain)
       if not start_col_1i then break end
 

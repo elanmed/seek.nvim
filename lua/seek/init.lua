@@ -87,15 +87,15 @@ M.seek = function(opts)
   local curr_line_0i = vim.fn.line "." - 1
   local bottom_line_0i = vim.fn.line "w$" - 1
   local top_line_0i = vim.fn.line "w0" - 1
+  local cursor_row_1i, cursor_col_0i = unpack(vim.api.nvim_win_get_cursor(0))
+  local cursor_col_1i = cursor_col_0i + 1
 
   local lines = (function()
     if opts.direction == "after" then
-      local next_line_0i = curr_line_0i
-      return vim.api.nvim_buf_get_lines(0, next_line_0i, bottom_line_0i + 1, false)
+      return vim.api.nvim_buf_get_lines(0, curr_line_0i, bottom_line_0i + 1, false)
     end
 
-    local prev_line_0i = curr_line_0i
-    return tbl_reverse(vim.api.nvim_buf_get_lines(0, top_line_0i, prev_line_0i + 1, false))
+    return tbl_reverse(vim.api.nvim_buf_get_lines(0, top_line_0i, curr_line_0i + 1, false))
   end)()
 
   for line_idx_1i, line in ipairs(lines) do
@@ -103,13 +103,21 @@ M.seek = function(opts)
       line = line:lower()
     end
 
-    local idx_1i = 1
+    local col_idx_1i = 1
     while true do
+      local row_0i
+      local char_col_0i
+      local label_col_1i
+      local label_col_0i
+      local label
+
       local plain = true
-      local start_col_1i, end_col_1i = line:find(keys, idx_1i, plain)
+      local start_col_1i, end_col_1i = line:find(keys, col_idx_1i, plain)
       if not start_col_1i then break end
 
-      local row_0i = line_idx_1i - 1
+      if start_col_1i == cursor_col_1i then goto continue end
+
+      row_0i = line_idx_1i - 1
       row_0i = (function()
         if opts.direction == "before" then
           return curr_line_0i - row_0i
@@ -117,11 +125,11 @@ M.seek = function(opts)
         return curr_line_0i + row_0i
       end)()
 
-      local char_col_0i = start_col_1i - 1
+      char_col_0i = start_col_1i - 1
 
-      local label_col_1i = start_col_1i + 2
-      local label_col_0i = label_col_1i - 1
-      local label = labels[#matches + 1]
+      label_col_1i = start_col_1i + 2
+      label_col_0i = label_col_1i - 1
+      label = labels[#matches + 1]
 
       table.insert(matches,
         {
@@ -132,7 +140,8 @@ M.seek = function(opts)
           label = label,
         })
 
-      idx_1i = end_col_1i + 1
+      ::continue::
+      col_idx_1i = end_col_1i + 1
     end
   end
 

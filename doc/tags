@@ -1,4 +1,5 @@
 seek-api	seek.txt	/*seek-api*
+seek-overview	seek.txt	/*seek-overview*
 seek-seek.nvim	seek.txt	/*seek-seek.nvim*
 seek-similar-plugins	seek.txt	/*seek-similar-plugins*
 seek-table-of-contents	seek.txt	/*seek-table-of-contents*

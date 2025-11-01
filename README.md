@@ -2,6 +2,15 @@
 
 My take on a minimal [`vim-easymotion`](https://github.com/easymotion/vim-easymotion)
 
+### Overview
+- ~200 LOC, 1 source file, 1 test file (TODO)
+- When invoking `seek()`, the next two chars are recorded:
+    - If either is `<Esc>` or `<C-c>`, the function is aborted
+    - Else, `seek()` searches for substring matches of the recorded chars and creates an extmark label immediately after the match
+    - The next char is recorded:
+        - If a label is typed, the cursor is to the location of the first typed char (not the label) and the jumplist is updated
+        - Else, the function is aborted
+
 ### API
 ```lua
 --- @class SeekOpts

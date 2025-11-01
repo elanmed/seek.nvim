@@ -136,6 +136,7 @@ M.seek = function(opts)
   if #matches == 1 then
     local match = matches[1]
     local row_1i = match.row_0i + 1
+    vim.cmd.normal { [[M']], bang = true, }
     vim.api.nvim_win_set_cursor(0, { row_1i, match.char_col_0i, })
     vim.api.nvim_buf_clear_namespace(0, ns_id, 0, -1)
     return
@@ -159,6 +160,7 @@ M.seek = function(opts)
     for _, match in ipairs(matches) do
       if label_key.char == match.label then
         local row_1i = match.row_0i + 1
+        vim.cmd.normal { [[M']], bang = true, }
         vim.api.nvim_win_set_cursor(0, { row_1i, match.char_col_0i, })
         vim.api.nvim_buf_clear_namespace(0, ns_id, 0, -1)
         return

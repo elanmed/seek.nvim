@@ -35,7 +35,7 @@ local notify = function(level, msg, ...)
 end
 
 local ns_id = vim.api.nvim_create_namespace "seek"
-local lower_case = ("abcdefghijklmnopqrstuvwxyz")
+local lower_case = ("asdfjklghqweruioptyzxcvnmb")
 local labels = vim.split(lower_case .. lower_case:upper(), "")
 
 -- TODO

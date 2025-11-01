@@ -113,8 +113,8 @@ M.seek = function(opts)
       local start_col_1i, end_col_1i = line:find(keys, col_idx_1i, plain)
       if not start_col_1i then break end
 
-      if start_col_1i == cursor_col_1i then goto continue end
       if line_idx_1i == 1 then
+        if start_col_1i == cursor_col_1i then goto continue end
         if opts.direction == "before" and start_col_1i > cursor_col_1i then goto continue end
         if opts.direction == "after" and start_col_1i < cursor_col_1i then goto continue end
       end

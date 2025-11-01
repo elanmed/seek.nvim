@@ -40,8 +40,6 @@ local labels = vim.split(lower_case .. lower_case:upper(), "")
 
 -- TODO
 -- handle when the first key is the last char in the line - what's the second key
--- search on the current line?
--- avoid searching where the cursor is
 
 local M = {}
 
@@ -116,6 +114,10 @@ M.seek = function(opts)
       if not start_col_1i then break end
 
       if start_col_1i == cursor_col_1i then goto continue end
+      if line_idx_1i == 1 then
+        if opts.direction == "before" and start_col_1i > cursor_col_1i then goto continue end
+        if opts.direction == "after" and start_col_1i < cursor_col_1i then goto continue end
+      end
 
       row_0i = line_idx_1i - 1
       row_0i = (function()

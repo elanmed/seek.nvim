@@ -1,14 +1,3 @@
---- @generic T
---- @param val T | nil
---- @param default_val T
---- @return T
-local default = function(val, default_val)
-  if val == nil then
-    return default_val
-  end
-  return val
-end
-
 local get_key = function()
   local ok, char = pcall(vim.fn.getchar)
   if not ok then return { type = "error", char = nil, } end
@@ -54,7 +43,7 @@ M.seek = function(opts)
   if opts.direction ~= "before" and opts.direction ~= "after" then
     return notify(vim.log.levels.ERROR, "seek.opts.direction must be 'before' or 'after'")
   end
-  local case_sensitive = default(vim.tbl_get(opts, "case_sensitive"), false)
+  local case_sensitive = vim.tbl_get(opts, "case_sensitive") == nil and true or false
 
   local first_key = get_key()
   if first_key.type == "error" then
@@ -135,7 +124,6 @@ M.seek = function(opts)
 
       table.insert(matches,
         {
-          line = line,
           row_0i = row_0i,
           char_col_0i = char_col_0i,
           label_col_0i = label_col_0i,

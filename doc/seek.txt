@@ -3,6 +3,7 @@
 ==============================================================================
 Table of Contents                                     *seek-table-of-contents*
 
+API ............................................................... |seek-api|
 Similar plugins ....................................... |seek-similar-plugins|
 
 ==============================================================================
@@ -12,6 +13,18 @@ Similar plugins ....................................... |seek-similar-plugins|
 My take on a minimal `vim-easymotion`
 <https://github.com/easymotion/vim-easymotion>
 
+
+                                                                              
+API                                                                 *seek-api*
+
+>lua
+    --- @class SeekOpts
+    --- @field direction "before"|"after"
+    --- @field case_sensitive? boolean defaults to false
+    
+    --- @param opts SeekOpts
+    local seek = function(opts)
+<
 
                                                                               
 SIMILAR PLUGINS                                         *seek-similar-plugins*

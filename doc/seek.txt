@@ -1,4 +1,4 @@
-*seek.txt*                                       Last change: 2025 November 01
+*seek.txt*                                       Last change: 2025 November 02
 
 ==============================================================================
 Table of Contents                                     *seek-table-of-contents*
@@ -18,15 +18,14 @@ My take on a minimal `vim-easymotion`
                                                                               
 OVERVIEW                                                       *seek-overview*
 
-- ~200 LOC, 1 source file, 1 test file (TODO)
-- When invoking `seek()`, the next two chars are recorded: - If either is
-  `<Esc>` or `<C-c>`, the function is aborted - Else, `seek()` searches for
-  substring matches of the recorded chars - If there's one match, the cursor
-  is set to the location of the first typed char and the jumplist is updated -
-  Else, an extmark label is set immediately after the match - The next char is
-  recorded: - If a label is typed, the cursor is to the location of the first
-  typed char (not the label) and the jumplist is updated - Else, the function
-  is aborted
+- ~200 LOC, 1 source file, 1 test file
+- When calling `seek()`, the next two chars are recorded and used to search
+  for substring matches - If there's one match, the cursor is set to the
+  location corresponding to the first typed char and the jumplist is updated -
+  Else, an extmark label is set on the character following the match - The
+  next char is recorded: - If a label is typed, the cursor is to the location
+  corresponding to the first typed char and the jumplist is updated
+- At any point, the function can be aborted with `<Esc>` or `<C-c>`
 
                                                                               
 API                                                                 *seek-api*

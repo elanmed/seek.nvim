@@ -2,14 +2,16 @@
 
 My take on a minimal [`vim-easymotion`](https://github.com/easymotion/vim-easymotion)
 
+![demo](https://elanmed.dev/nvim-plugins/seek.png)
+
 ### Overview
 - ~200 LOC, 1 source file, 1 test file
-- When calling `seek()`, the next two chars are recorded and used to search for substring matches
-    - If there's one match, the cursor is set to the location corresponding to the first typed char and the jumplist is updated
-    - Else, an extmark label is set on the character following the match
-    - The next char is recorded:
-        - If a label is typed, the cursor is to the location corresponding to the first typed char and the jumplist is updated
-- At any point, the function can be aborted with `<Esc>` or `<C-c>`
+- When calling `seek()`, it records the next keys and searches for substring matches of those characters in the file
+    - If there's only one match, the cursor is set to the location of the match corresponding to the first typed key
+    - Else, an extmark label is set on the character _following_ the match
+    - The next key is recorded:
+        - If a label is typed, the cursor is to the location corresponding to the first typed char (i.e. not the label)
+- At any point, the `seek()` can be aborted with `<Esc>` or `<C-c>`
 
 ### API
 ```lua
@@ -22,6 +24,7 @@ local seek = function(opts)
 ```
 
 ### Similar plugins
+- [`vim-easymotion`](https://github.com/easymotion/vim-easymotion)
 - [`flash`](https://github.com/folke/flash.nvim)
 - [`leap`](https://github.com/ggandor/leap.nvim)
 - [`hop`](https://github.com/smoka7/hop.nvim)

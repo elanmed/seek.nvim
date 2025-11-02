@@ -40,7 +40,10 @@ M.seek = function(opts)
   if opts.direction ~= "backwards" and opts.direction ~= "forwards" then
     return notify(vim.log.levels.ERROR, "seek.opts.direction must be 'backwards' or 'forwards'")
   end
-  local case_sensitive = vim.tbl_get(opts, "case_sensitive") == nil and true or false
+  local case_sensitive = (function()
+    if vim.tbl_get(opts, "case_sensitive") == nil then return false end
+    return false
+  end)()
 
   local first_key = get_key()
   if first_key.type == "error" then

@@ -42,7 +42,7 @@ M.seek = function(opts)
   end
   local case_sensitive = (function()
     if vim.tbl_get(opts, "case_sensitive") == nil then return false end
-    return false
+    return opts.case_sensitive
   end)()
 
   local first_key = get_key()
@@ -184,7 +184,7 @@ M.setup = function()
   if vim.g.seek_setup_called then return end
   vim.g.seek_setup_called = true
 
-  local hl_ns_id = vim.api.nvim_create_namespace "seek-hl-ns_id"
+  local hl_ns_id = vim.api.nvim_create_namespace "seek-hl-ns-id"
   vim.api.nvim_set_hl(hl_ns_id, "SeekLabel", { default = true, link = "Search", })
 end
 

@@ -16,8 +16,7 @@ local expect_cursor = MiniTest.new_expectation(
   end,
   --- @param row_1i number
   --- @param col_0i number
-  --- @param content string
-  function(row_1i, col_0i, content)
+  function(row_1i, col_0i)
     local cursor = child.api.nvim_win_get_cursor(child.api.nvim_get_current_win())
     return ("Expected cursor to be at %s, %s, was at %s, %s with content '%s'"):format(
       row_1i, col_0i, cursor[1], cursor[2]
@@ -92,8 +91,7 @@ T["seek"]["case sensitive"] = function()
   expect_cursor(2, 19, "pcall(vim.fn.getchar)")
   child.lua [[vim.schedule(function() M.seek { direction = "forwards", case_sensitive = true } end)]]
   child.type_keys "er"
-  -- TODO error in MiniTest
-  -- expect_cursor(5, 42)
+  expect_cursor(5, 42, "error', char = nil, } end")
 end
 T["seek"]["no matches"] = function()
   expect_cursor(2, 19, "pcall(vim.fn.getchar)")
@@ -106,6 +104,33 @@ T["seek"]["invalid label selected"] = function()
   child.lua [[vim.schedule(function() M.seek { direction = "forwards" } end)]]
   child.type_keys "chz"
   MiniTest.expect.reference_screenshot(child.get_screenshot())
+end
+
+T["seek"]["backwards"] = MiniTest.new_set {
+  hooks = {
+    pre_case = function()
+      child.type_keys "G0"
+      child.type_keys "k$"
+    end,
+  },
+}
+T["seek"]["backwards"]["same line"] = function()
+  expect_cursor(6, 58, "}")
+  child.lua [[vim.schedule(function() M.seek { direction = "backwards" } end)]]
+  child.type_keys "cha"
+  expect_cursor(6, 29, "char = vim.fn.nr2char(char), }")
+end
+T["seek"]["backwards"]["separate line"] = function()
+  expect_cursor(6, 58, "}")
+  child.lua [[vim.schedule(function() M.seek { direction = "backwards" } end)]]
+  child.type_keys "chf"
+  expect_cursor(5, 5, "char == escape then return { type = 'error', char = nil, } end")
+end
+T["seek"]["backwards"]["single match"] = function()
+  expect_cursor(6, 58, "}")
+  child.lua [[vim.schedule(function() M.seek { direction = "backwards" } end)]]
+  child.type_keys "pc"
+  expect_cursor(2, 19, "pcall(vim.fn.getchar)")
 end
 
 return T

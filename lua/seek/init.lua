@@ -23,7 +23,7 @@ local notify = function(level, msg, ...)
   vim.notify(msg:format(...), level)
 end
 
-local ns_id = vim.api.nvim_create_namespace "seek"
+local extmark_ns_id = vim.api.nvim_create_namespace "seek-extmark-ns-id"
 local lower_case = ("asdfjklghqweruioptyzxcvnmb")
 local labels = vim.split(lower_case .. lower_case:upper(), "")
 
@@ -74,7 +74,7 @@ M.seek = function(opts)
   local curr_line_0i = vim.fn.line "." - 1
   local bottom_line_0i = vim.fn.line "w$" - 1
   local top_line_0i = vim.fn.line "w0" - 1
-  local cursor_row_1i, cursor_col_0i = unpack(vim.api.nvim_win_get_cursor(0))
+  local _, cursor_col_0i = unpack(vim.api.nvim_win_get_cursor(0))
   local cursor_col_1i = cursor_col_0i + 1
 
   local lines = (function()
@@ -145,13 +145,13 @@ M.seek = function(opts)
     local row_1i = match.row_0i + 1
     vim.cmd.normal { [[m']], bang = true, }
     vim.api.nvim_win_set_cursor(0, { row_1i, match.char_col_0i, })
-    vim.api.nvim_buf_clear_namespace(0, ns_id, 0, -1)
+    vim.api.nvim_buf_clear_namespace(0, extmark_ns_id, 0, -1)
     return
   end
 
   for _, match in ipairs(matches) do
-    vim.api.nvim_buf_set_extmark(0, ns_id, match.row_0i, match.label_col_0i, {
-      virt_text = { { match.label, "CurSearch", }, },
+    vim.api.nvim_buf_set_extmark(0, extmark_ns_id, match.row_0i, match.label_col_0i, {
+      virt_text = { { match.label, "SeekLabel", }, },
       virt_text_pos = "overlay",
     })
   end
@@ -160,7 +160,7 @@ M.seek = function(opts)
     local label_key = get_key()
     if label_key.type == "error" then
       notify(vim.log.levels.WARN, "No label selected")
-      vim.api.nvim_buf_clear_namespace(0, ns_id, 0, -1)
+      vim.api.nvim_buf_clear_namespace(0, extmark_ns_id, 0, -1)
       return
     end
 
@@ -169,14 +169,23 @@ M.seek = function(opts)
         local row_1i = match.row_0i + 1
         vim.cmd.normal { [[m']], bang = true, }
         vim.api.nvim_win_set_cursor(0, { row_1i, match.char_col_0i, })
-        vim.api.nvim_buf_clear_namespace(0, ns_id, 0, -1)
+        vim.api.nvim_buf_clear_namespace(0, extmark_ns_id, 0, -1)
         return
       end
     end
 
     notify(vim.log.levels.WARN, "Invalid label selected")
-    vim.api.nvim_buf_clear_namespace(0, ns_id, 0, -1)
+    vim.api.nvim_buf_clear_namespace(0, extmark_ns_id, 0, -1)
   end)
+end
+
+vim.g.seek_setup_called = false
+M.setup = function()
+  if vim.g.seek_setup_called then return end
+  vim.g.seek_setup_called = true
+
+  local hl_ns_id = vim.api.nvim_create_namespace "seek-hl-ns_id"
+  vim.api.nvim_set_hl(hl_ns_id, "SeekLabel", { default = true, link = "Search", })
 end
 
 return M

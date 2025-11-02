@@ -47,13 +47,13 @@ M.seek = function(opts)
 
   local first_key = get_key()
   if first_key.type == "error" then
-    notify(vim.log.levels.INFO, "Exiting forwards key 1")
+    notify(vim.log.levels.INFO, "Exiting")
     return
   end
 
   local second_key = get_key()
   if second_key.type == "error" then
-    notify(vim.log.levels.INFO, "Exiting forwards key 2")
+    notify(vim.log.levels.INFO, "Exiting")
     return
   end
 
@@ -159,7 +159,7 @@ M.seek = function(opts)
   vim.schedule(function()
     local label_key = get_key()
     if label_key.type == "error" then
-      notify(vim.log.levels.WARN, "No label selected")
+      notify(vim.log.levels.WARN, "Exiting")
       vim.api.nvim_buf_clear_namespace(0, extmark_ns_id, 0, -1)
       return
     end

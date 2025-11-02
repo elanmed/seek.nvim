@@ -49,7 +49,7 @@ local T = MiniTest.new_set {
 }
 
 T["seek"] = MiniTest.new_set()
-T["seek"]["cancel select with escape"] = function()
+T["seek"]["cancel select with <Esc>"] = function()
   expect_cursor(2, 19, "pcall(vim.fn.getchar)")
   child.lua [[vim.schedule(function() M.seek { direction = "forwards" } end)]]
   child.type_keys "<Esc>"
@@ -59,7 +59,7 @@ T["seek"]["cancel select with escape"] = function()
   child.type_keys { "c", "<Esc>", }
   MiniTest.expect.reference_screenshot(child.get_screenshot())
 end
-T["seek"]["cancel select with C-c"] = function()
+T["seek"]["cancel select with <C-c>"] = function()
   expect_cursor(2, 19, "pcall(vim.fn.getchar)")
   child.lua [[vim.schedule(function() M.seek { direction = "forwards" } end)]]
   child.type_keys "<C-c>"
@@ -103,6 +103,20 @@ T["seek"]["invalid label selected"] = function()
   expect_cursor(2, 19, "pcall(vim.fn.getchar)")
   child.lua [[vim.schedule(function() M.seek { direction = "forwards" } end)]]
   child.type_keys "chz"
+  MiniTest.expect.reference_screenshot(child.get_screenshot())
+end
+T["seek"]["cancel label with <Esc>"] = function()
+  expect_cursor(2, 19, "pcall(vim.fn.getchar)")
+  child.lua [[vim.schedule(function() M.seek { direction = "forwards" } end)]]
+  child.type_keys "ch"
+  child.type_keys "<Esc>"
+  MiniTest.expect.reference_screenshot(child.get_screenshot())
+end
+T["seek"]["cancel label with <C-c>"] = function()
+  expect_cursor(2, 19, "pcall(vim.fn.getchar)")
+  child.lua [[vim.schedule(function() M.seek { direction = "forwards" } end)]]
+  child.type_keys "ch"
+  child.type_keys "<C-c>"
   MiniTest.expect.reference_screenshot(child.get_screenshot())
 end
 

@@ -99,13 +99,13 @@ M.seek = function(opts)
       local label
 
       local plain = true
-      local start_col_1i, end_col_1i = line:find(keys, col_idx_1i, plain)
-      if not start_col_1i then break end
+      local match_start_col_1i, match_end_col_1i = line:find(keys, col_idx_1i, plain)
+      if not match_start_col_1i then break end
 
       if line_idx_1i == 1 then
-        if start_col_1i == cursor_col_1i then goto continue end
-        if opts.direction == "backwards" and start_col_1i > cursor_col_1i then goto continue end
-        if opts.direction == "forwards" and start_col_1i < cursor_col_1i then goto continue end
+        if match_start_col_1i == cursor_col_1i then goto continue end
+        if opts.direction == "backwards" and match_start_col_1i > cursor_col_1i then goto continue end
+        if opts.direction == "forwards" and match_start_col_1i < cursor_col_1i then goto continue end
       end
 
       row_0i = line_idx_1i - 1
@@ -116,22 +116,20 @@ M.seek = function(opts)
         return curr_line_0i + row_0i
       end)()
 
-      char_col_0i = start_col_1i - 1
-
-      label_col_1i = start_col_1i + 2
+      label_col_1i = match_start_col_1i + 2
       label_col_0i = label_col_1i - 1
       label = labels[#matches + 1]
 
       table.insert(matches,
         {
           row_0i = row_0i,
-          char_col_0i = char_col_0i,
+          char_col_0i = match_start_col_1i - 1,
           label_col_0i = label_col_0i,
           label = label,
         })
 
       ::continue::
-      col_idx_1i = end_col_1i + 1
+      col_idx_1i = match_end_col_1i + 1
     end
   end
 

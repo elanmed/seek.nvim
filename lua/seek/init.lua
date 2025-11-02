@@ -19,7 +19,7 @@ end
 --- @param msg string
 --- @param ... any
 local notify = function(level, msg, ...)
-  msg = "[marks.nvim]: " .. msg
+  msg = "[seek.nvim]: " .. msg
   vim.notify(msg:format(...), level)
 end
 

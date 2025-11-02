@@ -27,33 +27,30 @@ local ns_id = vim.api.nvim_create_namespace "seek"
 local lower_case = ("asdfjklghqweruioptyzxcvnmb")
 local labels = vim.split(lower_case .. lower_case:upper(), "")
 
--- TODO
--- handle when the first key is the last char in the line - what's the second key
-
 local M = {}
 
 --- @class SeekOpts
---- @field direction "before"|"after"
+--- @field direction "backwards"|"forwards"
 --- @field case_sensitive? boolean
 --- @param opts SeekOpts
 M.seek = function(opts)
   if opts == nil then
     return notify(vim.log.levels.ERROR, "seek.opts is a required param")
   end
-  if opts.direction ~= "before" and opts.direction ~= "after" then
-    return notify(vim.log.levels.ERROR, "seek.opts.direction must be 'before' or 'after'")
+  if opts.direction ~= "backwards" and opts.direction ~= "forwards" then
+    return notify(vim.log.levels.ERROR, "seek.opts.direction must be 'backwards' or 'forwards'")
   end
   local case_sensitive = vim.tbl_get(opts, "case_sensitive") == nil and true or false
 
   local first_key = get_key()
   if first_key.type == "error" then
-    notify(vim.log.levels.INFO, "Exiting after key 1")
+    notify(vim.log.levels.INFO, "Exiting forwards key 1")
     return
   end
 
   local second_key = get_key()
   if second_key.type == "error" then
-    notify(vim.log.levels.INFO, "Exiting after key 2")
+    notify(vim.log.levels.INFO, "Exiting forwards key 2")
     return
   end
 
@@ -78,7 +75,7 @@ M.seek = function(opts)
   local cursor_col_1i = cursor_col_0i + 1
 
   local lines = (function()
-    if opts.direction == "after" then
+    if opts.direction == "forwards" then
       return vim.api.nvim_buf_get_lines(0, curr_line_0i, bottom_line_0i + 1, false)
     end
 
@@ -104,13 +101,13 @@ M.seek = function(opts)
 
       if line_idx_1i == 1 then
         if start_col_1i == cursor_col_1i then goto continue end
-        if opts.direction == "before" and start_col_1i > cursor_col_1i then goto continue end
-        if opts.direction == "after" and start_col_1i < cursor_col_1i then goto continue end
+        if opts.direction == "backwards" and start_col_1i > cursor_col_1i then goto continue end
+        if opts.direction == "forwards" and start_col_1i < cursor_col_1i then goto continue end
       end
 
       row_0i = line_idx_1i - 1
       row_0i = (function()
-        if opts.direction == "before" then
+        if opts.direction == "backwards" then
           return curr_line_0i - row_0i
         end
         return curr_line_0i + row_0i

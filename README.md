@@ -14,7 +14,7 @@ My take on a minimal [`vim-easymotion`](https://github.com/easymotion/vim-easymo
 ### API
 ```lua
 --- @class SeekOpts
---- @field direction "before"|"after"
+--- @field direction "backwards"|"forwards"
 --- @field case_sensitive? boolean defaults to false
 
 --- @param opts SeekOpts

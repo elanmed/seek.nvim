@@ -6,11 +6,11 @@ My take on a minimal [`vim-easymotion`](https://github.com/easymotion/vim-easymo
 
 ### Overview
 - ~200 LOC, 1 source file, 1 test file
-- When calling `seek()`, it records the next keys and searches for substring matches of those characters in the file
-    - If there's only one match, the cursor is set to the location of the match corresponding to the first typed key
-    - Else, an extmark label is set on the character _following_ the match
+- When calling `seek()`, the function records the next two keys and searches for substring matches of those characters in the file
+    - If there's only one match, the cursor is set to the match
+    - Otherwise, an extmark label is set on the character _following_ the match
     - The next key is recorded:
-        - If a label is typed, the cursor is to the location corresponding to the first typed char (i.e. not the label)
+        - If a label is typed, the cursor is to the location corresponding to the first typed char (i.e. not the location of the label)
 - At any point, the `seek()` can be aborted with `<Esc>` or `<C-c>`
 
 ### API

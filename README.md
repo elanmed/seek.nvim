@@ -10,7 +10,7 @@ My take on a minimal [`vim-easymotion`](https://github.com/easymotion/vim-easymo
     - If there's only one match, the cursor is set to the match
     - Otherwise, an extmark label is set on the character _following_ the match
     - The next key is recorded:
-        - If a label is typed, the cursor is to the location corresponding to the first typed char (i.e. not the location of the label)
+        - If a label is typed, the cursor is set to the location corresponding to the first typed char (i.e. not the location of the label)
 - At any point, the `seek()` can be aborted with `<Esc>` or `<C-c>`
 
 ### API

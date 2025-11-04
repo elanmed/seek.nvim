@@ -17,7 +17,7 @@ My take on a minimal [`vim-easymotion`](https://github.com/easymotion/vim-easymo
 ```lua
 --- @class SeekOpts
 --- @field direction "backwards"|"forwards"
---- @field case_sensitive? boolean defaults to false
+--- @field case_type? "sensitive"|"insensitive"|"smart" defaults to "smart"
 
 --- @param opts SeekOpts
 local seek = function(opts)
@@ -25,6 +25,6 @@ local seek = function(opts)
 
 ### Similar plugins
 - [`vim-easymotion`](https://github.com/easymotion/vim-easymotion)
-- [`flash`](https://github.com/folke/flash.nvim)
-- [`leap`](https://github.com/ggandor/leap.nvim)
-- [`hop`](https://github.com/smoka7/hop.nvim)
+- [`flash.nvim`](https://github.com/folke/flash.nvim)
+- [`leap.nvim`](https://github.com/ggandor/leap.nvim)
+- [`hop.nvim`](https://github.com/smoka7/hop.nvim)

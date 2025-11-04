@@ -18,7 +18,7 @@ local expect_cursor = MiniTest.new_expectation(
   --- @param col_0i number
   function(row_1i, col_0i)
     local cursor = child.api.nvim_win_get_cursor(child.api.nvim_get_current_win())
-    return ("Expected cursor to be at %s, %s, was at %s, %s with content '%s'"):format(
+    return ("Expected cursor to be at %s, %s, was at %s, %s"):format(
       row_1i, col_0i, cursor[1], cursor[2]
     )
   end
@@ -87,15 +87,41 @@ T["seek"]["single match"] = function()
   child.type_keys "lo"
   expect_cursor(4, 2, "local escape = 27")
 end
-T["seek"]["case sensitive"] = function()
+T["seek"]["case_type=smart"] = MiniTest.new_set()
+T["seek"]["case_type=smart"]["lower case input"] = function()
   expect_cursor(2, 19, "pcall(vim.fn.getchar)")
-  child.lua [[vim.schedule(function() M.seek { direction = "forwards", case_sensitive = true } end)]]
+  child.lua [[vim.schedule(function() M.seek { direction = "forwards" } end)]]
+  child.type_keys "era"
+  expect_cursor(3, 34, "Error', char = nil, } end")
+end
+T["seek"]["case_type=smart"]["upper case input"] = function()
+  expect_cursor(2, 19, "pcall(vim.fn.getchar)")
+  child.lua [[vim.schedule(function() M.seek { direction = "forwards" } end)]]
+  child.type_keys "Er"
+  expect_cursor(3, 34, "Error', char = nil, } end")
+end
+T["seek"]["case_type=sensitive"] = MiniTest.new_set()
+T["seek"]["case_type=sensitive"]["lower case input"] = function()
+  expect_cursor(2, 19, "pcall(vim.fn.getchar)")
+  child.lua [[vim.schedule(function() M.seek { direction = "forwards", case_type = "sensitive" } end)]]
   child.type_keys "er"
   expect_cursor(5, 42, "error', char = nil, } end")
 end
+T["seek"]["case_type=sensitive"]["upper case input"] = function()
+  expect_cursor(2, 19, "pcall(vim.fn.getchar)")
+  child.lua [[vim.schedule(function() M.seek { direction = "forwards", case_type = "sensitive" } end)]]
+  child.type_keys "Er"
+  expect_cursor(3, 34, "Error', char = nil, } end")
+end
+T["seek"]["case_type=insensitive"] = function()
+  expect_cursor(2, 19, "pcall(vim.fn.getchar)")
+  child.lua [[vim.schedule(function() M.seek { direction = "forwards", case_type = "insensitive" } end)]]
+  child.type_keys "era"
+  expect_cursor(3, 34, "Error', char = nil, } end")
+end
 T["seek"]["no matches"] = function()
   expect_cursor(2, 19, "pcall(vim.fn.getchar)")
-  child.lua [[vim.schedule(function() M.seek { direction = "forwards", case_sensitive = true } end)]]
+  child.lua [[vim.schedule(function() M.seek { direction = "forwards" } end)]]
   child.type_keys "zz"
   MiniTest.expect.reference_screenshot(child.get_screenshot())
 end

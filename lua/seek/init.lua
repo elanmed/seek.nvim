@@ -23,15 +23,29 @@ local notify = function(level, msg, ...)
   vim.notify(msg:format(...), level)
 end
 
+--- @param case_type CaseType
+--- @param keys string
+local should_lowercase = function(case_type, keys)
+  if case_type == "insensitive" then
+    return true
+  elseif case_type == "smart" then
+    local has_uppercase = keys:match "[%u]"
+    if has_uppercase then return false end
+    return true
+  end
+end
+
 local ns_id = vim.api.nvim_create_namespace "Seek"
 local lower_case = ("asdfjklghqweruioptyzxcvnmb")
 local labels = vim.split(lower_case .. lower_case:upper(), "")
 
 local M = {}
 
+--- @alias CaseType "sensitive"|"insensitive"|"smart"
+
 --- @class SeekOpts
 --- @field direction "backwards"|"forwards"
---- @field case_sensitive? boolean
+--- @field case_type? CaseType
 --- @param opts SeekOpts
 M.seek = function(opts)
   if opts == nil then
@@ -40,9 +54,10 @@ M.seek = function(opts)
   if opts.direction ~= "backwards" and opts.direction ~= "forwards" then
     return notify(vim.log.levels.ERROR, "seek.opts.direction must be 'backwards' or 'forwards'")
   end
-  local case_sensitive = (function()
-    if vim.tbl_get(opts, "case_sensitive") == nil then return false end
-    return opts.case_sensitive
+  --- @type CaseType
+  local case_type = (function()
+    if vim.tbl_get(opts, "case_type") == nil then return "smart" end
+    return opts.case_type
   end)()
 
   local first_key = get_key()
@@ -58,7 +73,7 @@ M.seek = function(opts)
   end
 
   local keys = first_key.char .. second_key.char
-  if not case_sensitive then
+  if should_lowercase(case_type, keys) then
     keys = keys:lower()
   end
 
@@ -86,14 +101,13 @@ M.seek = function(opts)
   end)()
 
   for line_idx_1i, line in ipairs(lines) do
-    if not case_sensitive then
+    if should_lowercase(case_type, keys) then
       line = line:lower()
     end
 
     local col_idx_1i = 1
     while true do
       local row_0i
-      local char_col_0i
       local label_col_1i
       local label_col_0i
       local label

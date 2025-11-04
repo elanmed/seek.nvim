@@ -35,7 +35,7 @@ API                                                                 *seek-api*
 >lua
     --- @class SeekOpts
     --- @field direction "backwards"|"forwards"
-    --- @field case_sensitive? boolean defaults to false
+    --- @field case_type? "sensitive"|"insensitive"|"smart" defaults to "smart"
     
     --- @param opts SeekOpts
     local seek = function(opts)
@@ -45,8 +45,8 @@ API                                                                 *seek-api*
 SIMILAR PLUGINS                                         *seek-similar-plugins*
 
 - `vim-easymotion` <https://github.com/easymotion/vim-easymotion>
-- `flash` <https://github.com/folke/flash.nvim>
-- `leap` <https://github.com/ggandor/leap.nvim>
-- `hop` <https://github.com/smoka7/hop.nvim>
+- `flash.nvim` <https://github.com/folke/flash.nvim>
+- `leap.nvim` <https://github.com/ggandor/leap.nvim>
+- `hop.nvim` <https://github.com/smoka7/hop.nvim>
 
 vim:tw=78:ts=8:ft=help:norl:

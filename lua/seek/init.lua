@@ -44,16 +44,12 @@ local M = {}
 --- @alias CaseType "sensitive"|"insensitive"|"smart"
 
 --- @class SeekOpts
---- @field direction "backwards"|"forwards"
+--- @field direction? "backwards"|"forwards"
 --- @field case_type? CaseType
---- @param opts SeekOpts
+--- @param opts? SeekOpts
 M.seek = function(opts)
-  if opts == nil then
-    return notify(vim.log.levels.ERROR, "seek.opts is a required param")
-  end
-  if opts.direction ~= "backwards" and opts.direction ~= "forwards" then
-    return notify(vim.log.levels.ERROR, "seek.opts.direction must be 'backwards' or 'forwards'")
-  end
+  opts = opts or {}
+
   --- @type CaseType
   local case_type = (function()
     if vim.tbl_get(opts, "case_type") == nil then return "smart" end
@@ -95,12 +91,15 @@ M.seek = function(opts)
   local lines = (function()
     if opts.direction == "forwards" then
       return vim.api.nvim_buf_get_lines(0, curr_line_0i, bottom_line_0i + 1, false)
+    elseif opts.direction == "backwards" then
+      return tbl_reverse(vim.api.nvim_buf_get_lines(0, top_line_0i, curr_line_0i + 1, false))
+    else
+      return vim.api.nvim_buf_get_lines(0, top_line_0i, bottom_line_0i + 1, false)
     end
-
-    return tbl_reverse(vim.api.nvim_buf_get_lines(0, top_line_0i, curr_line_0i + 1, false))
   end)()
 
   for line_idx_1i, line in ipairs(lines) do
+    local line_idx_0i = line_idx_1i - 1
     if should_lowercase(case_type, keys) then
       line = line:lower()
     end
@@ -116,19 +115,21 @@ M.seek = function(opts)
       local match_start_col_1i, match_end_col_1i = line:find(keys, col_idx_1i, plain)
       if not match_start_col_1i then break end
 
-      if line_idx_1i == 1 then
+      row_0i = (function()
+        if opts.direction == "forwards" then
+          return curr_line_0i + line_idx_0i
+        elseif opts.direction == "backwards" then
+          return curr_line_0i - line_idx_0i
+        else
+          return top_line_0i + line_idx_0i
+        end
+      end)()
+
+      if row_0i == curr_line_0i then
         if match_start_col_1i == cursor_col_1i then goto continue end
         if opts.direction == "backwards" and match_start_col_1i > cursor_col_1i then goto continue end
         if opts.direction == "forwards" and match_start_col_1i < cursor_col_1i then goto continue end
       end
-
-      row_0i = line_idx_1i - 1
-      row_0i = (function()
-        if opts.direction == "backwards" then
-          return curr_line_0i - row_0i
-        end
-        return curr_line_0i + row_0i
-      end)()
 
       label_col_1i = match_start_col_1i + 2
       label_col_0i = label_col_1i - 1

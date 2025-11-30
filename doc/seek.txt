@@ -1,4 +1,4 @@
-*seek.txt*                                       Last change: 2025 November 02
+*seek.txt*                                       Last change: 2025 November 03
 
 ==============================================================================
 Table of Contents                                     *seek-table-of-contents*
@@ -34,10 +34,10 @@ API                                                                 *seek-api*
 
 >lua
     --- @class SeekOpts
-    --- @field direction "backwards"|"forwards"
+    --- @field direction? "backwards"|"forwards" if no direction is passed, the all visible lines are searched
     --- @field case_type? "sensitive"|"insensitive"|"smart" defaults to "smart"
     
-    --- @param opts SeekOpts
+    --- @param opts? SeekOpts
     local seek = function(opts)
 <
 

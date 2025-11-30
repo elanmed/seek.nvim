@@ -56,6 +56,7 @@ M.seek = function(opts)
     return opts.case_type
   end)()
 
+  notify(vim.log.levels.INFO, "Listening ...")
   local first_key = get_key()
   if first_key.type == "error" then
     notify(vim.log.levels.INFO, "Exiting")

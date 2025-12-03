@@ -73,7 +73,7 @@ end
 T["seek"]["same line"] = function()
   expect_cursor(2, 19, "pcall(vim.fn.getchar)")
   child.lua [[vim.schedule(function() M.seek {} end)]]
-  child.type_keys "chs"
+  child.type_keys "chj"
   expect_cursor(2, 35, "char)")
 end
 T["seek"]["separate line"] = function()
@@ -92,7 +92,7 @@ T["seek"]["case_type=smart"] = MiniTest.new_set()
 T["seek"]["case_type=smart"]["lower case input"] = function()
   expect_cursor(2, 19, "pcall(vim.fn.getchar)")
   child.lua [[vim.schedule(function() M.seek {} end)]]
-  child.type_keys "era"
+  child.type_keys "erf"
   expect_cursor(3, 34, "Error', char = nil, } end")
 end
 T["seek"]["case_type=smart"]["upper case input"] = function()
@@ -117,7 +117,7 @@ end
 T["seek"]["case_type=insensitive"] = function()
   expect_cursor(2, 19, "pcall(vim.fn.getchar)")
   child.lua [[vim.schedule(function() M.seek {  case_type = "insensitive" } end)]]
-  child.type_keys "era"
+  child.type_keys "erf"
   expect_cursor(3, 34, "Error', char = nil, } end")
 end
 
@@ -159,13 +159,13 @@ T["seek"]["backwards"] = MiniTest.new_set {
 T["seek"]["backwards"]["same line"] = function()
   expect_cursor(6, 58, "}")
   child.lua [[vim.schedule(function() M.seek { direction = "backwards" } end)]]
-  child.type_keys "cha"
+  child.type_keys "chf"
   expect_cursor(6, 29, "char = vim.fn.nr2char(char), }")
 end
 T["seek"]["backwards"]["separate line"] = function()
   expect_cursor(6, 58, "}")
   child.lua [[vim.schedule(function() M.seek { direction = "backwards" } end)]]
-  child.type_keys "chf"
+  child.type_keys "chk"
   expect_cursor(5, 5, "char == escape then return { type = 'error', char = nil, } end")
 end
 T["seek"]["backwards"]["single match"] = function()
@@ -179,13 +179,13 @@ T["seek"]["forwards"] = MiniTest.new_set()
 T["seek"]["forwards"]["same line"] = function()
   expect_cursor(2, 19, "pcall(vim.fn.getchar)")
   child.lua [[vim.schedule(function() M.seek { direction = "forwards" } end)]]
-  child.type_keys "cha"
+  child.type_keys "chf"
   expect_cursor(2, 35, "char)")
 end
 T["seek"]["forwards"]["separate line"] = function()
   expect_cursor(2, 19, "pcall(vim.fn.getchar)")
   child.lua [[vim.schedule(function() M.seek { direction = "forwards" } end)]]
-  child.type_keys "chs"
+  child.type_keys "chj"
   expect_cursor(3, 42, "char = nil, } end")
 end
 T["seek"]["forwards"]["single match"] = function()

@@ -36,7 +36,7 @@ local should_lowercase = function(case_type, keys)
 end
 
 local ns_id = vim.api.nvim_create_namespace "Seek"
-local lower_case = ("asdfjklghqweruioptyzxcvnmb")
+local lower_case = ("fjdkslgha;rueiwotyqpvbcnxmz")
 local labels = vim.split(lower_case .. lower_case:upper(), "")
 
 local M = {}

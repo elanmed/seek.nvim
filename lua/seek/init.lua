@@ -100,6 +100,9 @@ M.seek = function(opts)
   end)()
 
   for line_idx_1i, line in ipairs(lines) do
+    local is_fold_closed = vim.fn.foldclosed(line_idx_1i) ~= -1
+    if is_fold_closed then goto for_continue end
+
     local line_idx_0i = line_idx_1i - 1
     if should_lowercase(case_type, keys) then
       line = line:lower()
@@ -127,9 +130,9 @@ M.seek = function(opts)
       end)()
 
       if row_0i == curr_line_0i then
-        if match_start_col_1i == cursor_col_1i then goto continue end
-        if opts.direction == "backwards" and match_start_col_1i > cursor_col_1i then goto continue end
-        if opts.direction == "forwards" and match_start_col_1i < cursor_col_1i then goto continue end
+        if match_start_col_1i == cursor_col_1i then goto while_continue end
+        if opts.direction == "backwards" and match_start_col_1i > cursor_col_1i then goto while_continue end
+        if opts.direction == "forwards" and match_start_col_1i < cursor_col_1i then goto while_continue end
       end
 
       label_col_1i = match_start_col_1i + 2
@@ -144,9 +147,11 @@ M.seek = function(opts)
           label = label,
         })
 
-      ::continue::
+      ::while_continue::
       col_idx_1i = match_end_col_1i + 1
     end
+
+    ::for_continue::
   end
 
   if #matches == 0 then

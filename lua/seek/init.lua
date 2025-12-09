@@ -15,6 +15,12 @@ local tbl_reverse = function(tbl)
   return reversed
 end
 
+local clear_cmdline = function()
+  vim.fn.timer_start(1000, function()
+    vim.cmd "normal! :<Esc>"
+  end)
+end
+
 --- @param level vim.log.levels
 --- @param msg string
 --- @param ... any
@@ -60,12 +66,14 @@ M.seek = function(opts)
   local first_key = get_key()
   if first_key.type == "error" then
     notify(vim.log.levels.INFO, "Exiting")
+    clear_cmdline()
     return
   end
 
   local second_key = get_key()
   if second_key.type == "error" then
     notify(vim.log.levels.INFO, "Exiting")
+    clear_cmdline()
     return
   end
 
@@ -156,6 +164,7 @@ M.seek = function(opts)
 
   if #matches == 0 then
     notify(vim.log.levels.WARN, "No matches")
+    clear_cmdline()
     return
   end
 
@@ -180,6 +189,7 @@ M.seek = function(opts)
     if label_key.type == "error" then
       notify(vim.log.levels.WARN, "Exiting")
       vim.api.nvim_buf_clear_namespace(0, ns_id, 0, -1)
+      clear_cmdline()
       return
     end
 
@@ -194,6 +204,7 @@ M.seek = function(opts)
     end
 
     notify(vim.log.levels.WARN, "Invalid label selected")
+    clear_cmdline()
     vim.api.nvim_buf_clear_namespace(0, ns_id, 0, -1)
   end)
 end

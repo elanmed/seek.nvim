@@ -1,4 +1,4 @@
-*seek.txt*                                       Last change: 2025 November 03
+*seek.txt*                                       Last change: 2025 November 29
 
 ==============================================================================
 Table of Contents                                     *seek-table-of-contents*

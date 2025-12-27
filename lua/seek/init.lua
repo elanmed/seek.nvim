@@ -17,7 +17,7 @@ end
 
 local clear_cmdline = function()
   vim.fn.timer_start(1000, function()
-    vim.cmd "normal! :<Esc>"
+    if vim.fn.mode() == "n" then vim.cmd [[normal! :<Esc>]] end
   end)
 end
 
@@ -174,6 +174,7 @@ M.seek = function(opts)
     vim.cmd.normal { [[m']], bang = true, }
     vim.api.nvim_win_set_cursor(0, { row_1i, match.char_col_0i, })
     vim.api.nvim_buf_clear_namespace(0, ns_id, 0, -1)
+    clear_cmdline()
     return
   end
 

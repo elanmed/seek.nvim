@@ -2,6 +2,14 @@ require("mini.test").setup()
 
 local child = MiniTest.new_child_neovim()
 
+local start_seek = function(opts)
+  child.lua_func(function(opts)
+    vim.schedule(function()
+      M.seek(opts)
+    end)
+  end, opts or {})
+end
+
 local expect_cursor = MiniTest.new_expectation(
   "cursor set",
   --- @param row_1i number
@@ -34,7 +42,9 @@ local T = MiniTest.new_set {
       child.bo.readonly = false
       child.o.lines = 20
       child.o.columns = 75
-      child.lua [[M = require('seek')]]
+      child.lua_func(function()
+        M = require "seek"
+      end)
       child.api.nvim_buf_set_lines(0, 0, -1, true, {
         "local get_key = function()",
         "  local ok, char = pcall(vim.fn.getchar)",
@@ -54,98 +64,105 @@ local T = MiniTest.new_set {
 T["seek"] = MiniTest.new_set()
 T["seek"]["cancel select with <Esc>"] = function()
   expect_cursor(2, 19, "pcall(vim.fn.getchar)")
-  child.lua [[vim.schedule(function() M.seek {} end)]]
+  start_seek {}
   child.type_keys "<Esc>"
   MiniTest.expect.reference_screenshot(child.get_screenshot())
 
-  child.lua [[vim.schedule(function() M.seek {} end)]]
+  start_seek {}
   child.type_keys { "c", "<Esc>" }
   MiniTest.expect.reference_screenshot(child.get_screenshot())
 end
 T["seek"]["cancel select with <C-c>"] = function()
   expect_cursor(2, 19, "pcall(vim.fn.getchar)")
-  child.lua [[vim.schedule(function() M.seek {} end)]]
+  start_seek {}
   child.type_keys "<C-c>"
   MiniTest.expect.reference_screenshot(child.get_screenshot())
 
-  child.lua [[vim.schedule(function() M.seek {} end)]]
+  start_seek {}
   child.type_keys { "c", "<C-c>" }
   MiniTest.expect.reference_screenshot(child.get_screenshot())
 end
 
 T["seek"]["same line"] = function()
   expect_cursor(2, 19, "pcall(vim.fn.getchar)")
-  child.lua [[vim.schedule(function() M.seek {} end)]]
+  start_seek {}
   child.type_keys "chj"
   expect_cursor(2, 35, "char)")
 end
 T["seek"]["separate line"] = function()
   expect_cursor(2, 19, "pcall(vim.fn.getchar)")
-  child.lua [[vim.schedule(function() M.seek {} end)]]
+  start_seek {}
   child.type_keys "chd"
   expect_cursor(3, 42, "char = nil, } end")
 end
 T["seek"]["single match"] = function()
   expect_cursor(2, 19, "pcall(vim.fn.getchar)")
-  child.lua [[vim.schedule(function() M.seek {} end)]]
+  start_seek {}
   child.type_keys "no"
   expect_cursor(3, 5, "not ok then return { type = 'Error', char = nil, } end")
+end
+T["seek"]["multibyte input"] = function()
+  child.api.nvim_buf_set_lines(0, 0, -1, true, { "prefix éø target" })
+  child.api.nvim_win_set_cursor(0, { 1, 0 })
+  start_seek {}
+  child.type_keys "éø"
+  expect_cursor(1, 7, "éø target")
 end
 T["seek"]["case_type=smart"] = MiniTest.new_set()
 T["seek"]["case_type=smart"]["lower case input"] = function()
   expect_cursor(2, 19, "pcall(vim.fn.getchar)")
-  child.lua [[vim.schedule(function() M.seek {} end)]]
+  start_seek {}
   child.type_keys "erf"
   expect_cursor(3, 34, "Error', char = nil, } end")
 end
 T["seek"]["case_type=smart"]["upper case input"] = function()
   expect_cursor(2, 19, "pcall(vim.fn.getchar)")
-  child.lua [[vim.schedule(function() M.seek {} end)]]
+  start_seek {}
   child.type_keys "Er"
   expect_cursor(3, 34, "Error', char = nil, } end")
 end
 T["seek"]["case_type=sensitive"] = MiniTest.new_set()
 T["seek"]["case_type=sensitive"]["lower case input"] = function()
   expect_cursor(2, 19, "pcall(vim.fn.getchar)")
-  child.lua [[vim.schedule(function() M.seek { case_type = "sensitive" } end)]]
+  start_seek { case_type = "sensitive" }
   child.type_keys "er"
   expect_cursor(5, 42, "error', char = nil, } end")
 end
 T["seek"]["case_type=sensitive"]["upper case input"] = function()
   expect_cursor(2, 19, "pcall(vim.fn.getchar)")
-  child.lua [[vim.schedule(function() M.seek { case_type = "sensitive" } end)]]
+  start_seek { case_type = "sensitive" }
   child.type_keys "Er"
   expect_cursor(3, 34, "Error', char = nil, } end")
 end
 T["seek"]["case_type=insensitive"] = function()
   expect_cursor(2, 19, "pcall(vim.fn.getchar)")
-  child.lua [[vim.schedule(function() M.seek {  case_type = "insensitive" } end)]]
+  start_seek { case_type = "insensitive" }
   child.type_keys "erf"
   expect_cursor(3, 34, "Error', char = nil, } end")
 end
 
 T["seek"]["no matches"] = function()
   expect_cursor(2, 19, "pcall(vim.fn.getchar)")
-  child.lua [[vim.schedule(function() M.seek {} end)]]
+  start_seek {}
   child.type_keys "zz"
   MiniTest.expect.reference_screenshot(child.get_screenshot())
 end
 T["seek"]["invalid label selected"] = function()
   expect_cursor(2, 19, "pcall(vim.fn.getchar)")
-  child.lua [[vim.schedule(function() M.seek {} end)]]
+  start_seek {}
   child.type_keys "chz"
   MiniTest.expect.reference_screenshot(child.get_screenshot())
 end
 T["seek"]["cancel label with <Esc>"] = function()
   expect_cursor(2, 19, "pcall(vim.fn.getchar)")
-  child.lua [[vim.schedule(function() M.seek {} end)]]
+  start_seek {}
   child.type_keys "ch"
   child.type_keys "<Esc>"
   MiniTest.expect.reference_screenshot(child.get_screenshot())
 end
 T["seek"]["cancel label with <C-c>"] = function()
   expect_cursor(2, 19, "pcall(vim.fn.getchar)")
-  child.lua [[vim.schedule(function() M.seek {} end)]]
+  start_seek {}
   child.type_keys "ch"
   child.type_keys "<C-c>"
   MiniTest.expect.reference_screenshot(child.get_screenshot())
@@ -161,19 +178,19 @@ T["seek"]["backwards"] = MiniTest.new_set {
 }
 T["seek"]["backwards"]["same line"] = function()
   expect_cursor(6, 58, "}")
-  child.lua [[vim.schedule(function() M.seek { direction = "backwards" } end)]]
+  start_seek { direction = "backwards" }
   child.type_keys "chf"
   expect_cursor(6, 29, "char = vim.fn.nr2char(char), }")
 end
 T["seek"]["backwards"]["separate line"] = function()
   expect_cursor(6, 58, "}")
-  child.lua [[vim.schedule(function() M.seek { direction = "backwards" } end)]]
+  start_seek { direction = "backwards" }
   child.type_keys "chk"
   expect_cursor(5, 5, "char == escape then return { type = 'error', char = nil, } end")
 end
 T["seek"]["backwards"]["single match"] = function()
   expect_cursor(6, 58, "}")
-  child.lua [[vim.schedule(function() M.seek { direction = "backwards" } end)]]
+  start_seek { direction = "backwards" }
   child.type_keys "pc"
   expect_cursor(2, 19, "pcall(vim.fn.getchar)")
 end
@@ -181,19 +198,19 @@ end
 T["seek"]["forwards"] = MiniTest.new_set()
 T["seek"]["forwards"]["same line"] = function()
   expect_cursor(2, 19, "pcall(vim.fn.getchar)")
-  child.lua [[vim.schedule(function() M.seek { direction = "forwards" } end)]]
+  start_seek { direction = "forwards" }
   child.type_keys "chf"
   expect_cursor(2, 35, "char)")
 end
 T["seek"]["forwards"]["separate line"] = function()
   expect_cursor(2, 19, "pcall(vim.fn.getchar)")
-  child.lua [[vim.schedule(function() M.seek { direction = "forwards" } end)]]
+  start_seek { direction = "forwards" }
   child.type_keys "chj"
   expect_cursor(3, 42, "char = nil, } end")
 end
 T["seek"]["forwards"]["single match"] = function()
   expect_cursor(2, 19, "pcall(vim.fn.getchar)")
-  child.lua [[vim.schedule(function() M.seek { direction = "forwards" } end)]]
+  start_seek { direction = "forwards" }
   child.type_keys "lo"
   expect_cursor(4, 2, "local escape = 27")
 end
@@ -214,7 +231,7 @@ T["visible-range boundaries"]["default search excludes matches below the window"
     "zz outside",
   })
   child.api.nvim_win_set_cursor(0, { 1, 0 })
-  child.lua [[vim.schedule(function() M.seek {} end)]]
+  start_seek {}
   child.type_keys "zz"
   expect_cursor(3, 0, "zz inside")
 end
@@ -233,7 +250,7 @@ T["visible-range boundaries"]["forward search excludes matches below the window"
     "zz outside",
   })
   child.api.nvim_win_set_cursor(0, { 2, 0 })
-  child.lua [[vim.schedule(function() M.seek { direction = "forwards" } end)]]
+  start_seek { direction = "forwards" }
   child.type_keys "zz"
   expect_cursor(3, 0, "zz inside")
 end
@@ -252,7 +269,7 @@ T["visible-range boundaries"]["backward search excludes matches below the window
     "zz outside",
   })
   child.api.nvim_win_set_cursor(0, { 4, 0 })
-  child.lua [[vim.schedule(function() M.seek { direction = "backwards" } end)]]
+  start_seek { direction = "backwards" }
   child.type_keys "zz"
   expect_cursor(2, 0, "zz inside")
 end
@@ -268,7 +285,7 @@ T["closed folds"]["ignores folded matches and selects a visible match"] = functi
   child.cmd "setlocal foldmethod=manual"
   child.cmd "2,3fold"
   child.api.nvim_win_set_cursor(0, { 1, 0 })
-  child.lua [[vim.schedule(function() M.seek {} end)]]
+  start_seek {}
   child.type_keys "zz"
   expect_cursor(4, 0, "zz visible")
 end
@@ -277,13 +294,17 @@ T["setup"] = MiniTest.new_set()
 T["setup"]["sets the label highlight and is idempotent"] = function()
   child.g.seek_setup_called = false
   child.api.nvim_set_hl(0, "SeekLabel", {})
-  child.lua [[M.setup()]]
+  child.lua_func(function()
+    M.setup()
+  end)
   MiniTest.expect.equality(child.api.nvim_get_hl(0, { name = "SeekLabel", link = true }), {
     link = "Search",
   })
 
   child.api.nvim_set_hl(0, "SeekLabel", { link = "WarningMsg" })
-  child.lua [[M.setup()]]
+  child.lua_func(function()
+    M.setup()
+  end)
   MiniTest.expect.equality(child.api.nvim_get_hl(0, { name = "SeekLabel", link = true }), {
     link = "WarningMsg",
   })

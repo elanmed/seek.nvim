@@ -1,9 +1,13 @@
 local get_key = function()
   local ok, char = pcall(vim.fn.getchar)
-  if not ok then return { type = "error", char = nil, } end
+  if not ok then
+    return { type = "error", char = nil }
+  end
   local escape = 27
-  if char == escape then return { type = "error", char = nil, } end
-  return { type = "success", char = vim.fn.nr2char(char), }
+  if char == escape then
+    return { type = "error", char = nil }
+  end
+  return { type = "success", char = vim.fn.nr2char(char) }
 end
 
 --- @param tbl table
@@ -17,7 +21,9 @@ end
 
 local clear_cmdline = function()
   vim.fn.timer_start(1000, function()
-    if vim.fn.mode() == "n" then vim.cmd [[normal! :<Esc>]] end
+    if vim.fn.mode() == "n" then
+      vim.cmd [[normal! :<Esc>]]
+    end
   end)
 end
 
@@ -36,13 +42,15 @@ local should_lowercase = function(case_type, keys)
     return true
   elseif case_type == "smart" then
     local has_uppercase = keys:match "[%u]"
-    if has_uppercase then return false end
+    if has_uppercase then
+      return false
+    end
     return true
   end
 end
 
 local ns_id = vim.api.nvim_create_namespace "Seek"
-local lower_case = ("fjdkslgha;rueiwotyqpvbcnxmz")
+local lower_case = "fjdkslgha;rueiwotyqpvbcnxmz"
 local labels = vim.split(lower_case .. lower_case:upper(), "")
 
 local M = {}
@@ -58,7 +66,9 @@ M.seek = function(opts)
 
   --- @type CaseType
   local case_type = (function()
-    if vim.tbl_get(opts, "case_type") == nil then return "smart" end
+    if vim.tbl_get(opts, "case_type") == nil then
+      return "smart"
+    end
     return opts.case_type
   end)()
 
@@ -109,7 +119,9 @@ M.seek = function(opts)
 
   for line_idx_1i, line in ipairs(lines) do
     local is_fold_closed = vim.fn.foldclosed(line_idx_1i) ~= -1
-    if is_fold_closed then goto for_continue end
+    if is_fold_closed then
+      goto for_continue
+    end
 
     local line_idx_0i = line_idx_1i - 1
     if should_lowercase(case_type, keys) then
@@ -125,7 +137,9 @@ M.seek = function(opts)
 
       local plain = true
       local match_start_col_1i, match_end_col_1i = line:find(keys, col_idx_1i, plain)
-      if not match_start_col_1i then break end
+      if not match_start_col_1i then
+        break
+      end
 
       row_0i = (function()
         if opts.direction == "forwards" then
@@ -138,22 +152,27 @@ M.seek = function(opts)
       end)()
 
       if row_0i == curr_line_0i then
-        if match_start_col_1i == cursor_col_1i then goto while_continue end
-        if opts.direction == "backwards" and match_start_col_1i > cursor_col_1i then goto while_continue end
-        if opts.direction == "forwards" and match_start_col_1i < cursor_col_1i then goto while_continue end
+        if match_start_col_1i == cursor_col_1i then
+          goto while_continue
+        end
+        if opts.direction == "backwards" and match_start_col_1i > cursor_col_1i then
+          goto while_continue
+        end
+        if opts.direction == "forwards" and match_start_col_1i < cursor_col_1i then
+          goto while_continue
+        end
       end
 
       label_col_1i = match_start_col_1i + 2
       label_col_0i = label_col_1i - 1
       label = labels[#matches + 1]
 
-      table.insert(matches,
-        {
-          row_0i = row_0i,
-          char_col_0i = match_start_col_1i - 1,
-          label_col_0i = label_col_0i,
-          label = label,
-        })
+      table.insert(matches, {
+        row_0i = row_0i,
+        char_col_0i = match_start_col_1i - 1,
+        label_col_0i = label_col_0i,
+        label = label,
+      })
 
       ::while_continue::
       col_idx_1i = match_end_col_1i + 1
@@ -171,8 +190,8 @@ M.seek = function(opts)
   if #matches == 1 then
     local match = matches[1]
     local row_1i = match.row_0i + 1
-    vim.cmd.normal { [[m']], bang = true, }
-    vim.api.nvim_win_set_cursor(0, { row_1i, match.char_col_0i, })
+    vim.cmd.normal { [[m']], bang = true }
+    vim.api.nvim_win_set_cursor(0, { row_1i, match.char_col_0i })
     vim.api.nvim_buf_clear_namespace(0, ns_id, 0, -1)
     clear_cmdline()
     return
@@ -180,7 +199,7 @@ M.seek = function(opts)
 
   for _, match in ipairs(matches) do
     vim.api.nvim_buf_set_extmark(0, ns_id, match.row_0i, match.label_col_0i, {
-      virt_text = { { match.label, "SeekLabel", }, },
+      virt_text = { { match.label, "SeekLabel" } },
       virt_text_pos = "overlay",
     })
   end
@@ -197,8 +216,8 @@ M.seek = function(opts)
     for _, match in ipairs(matches) do
       if label_key.char == match.label then
         local row_1i = match.row_0i + 1
-        vim.cmd.normal { [[m']], bang = true, }
-        vim.api.nvim_win_set_cursor(0, { row_1i, match.char_col_0i, })
+        vim.cmd.normal { [[m']], bang = true }
+        vim.api.nvim_win_set_cursor(0, { row_1i, match.char_col_0i })
         vim.api.nvim_buf_clear_namespace(0, ns_id, 0, -1)
         return
       end
@@ -212,10 +231,12 @@ end
 
 vim.g.seek_setup_called = false
 M.setup = function()
-  if vim.g.seek_setup_called then return end
+  if vim.g.seek_setup_called then
+    return
+  end
   vim.g.seek_setup_called = true
 
-  vim.api.nvim_set_hl(0, "SeekLabel", { link = "Search", })
+  vim.api.nvim_set_hl(0, "SeekLabel", { link = "Search" })
 end
 
 return M

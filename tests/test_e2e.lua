@@ -1,4 +1,4 @@
-require "mini.test".setup()
+require("mini.test").setup()
 
 local child = MiniTest.new_child_neovim()
 
@@ -19,7 +19,10 @@ local expect_cursor = MiniTest.new_expectation(
   function(row_1i, col_0i)
     local cursor = child.api.nvim_win_get_cursor(child.api.nvim_get_current_win())
     return ("Expected cursor to be at %s, %s, was at %s, %s"):format(
-      row_1i, col_0i, cursor[1], cursor[2]
+      row_1i,
+      col_0i,
+      cursor[1],
+      cursor[2]
     )
   end
 )
@@ -27,7 +30,7 @@ local expect_cursor = MiniTest.new_expectation(
 local T = MiniTest.new_set {
   hooks = {
     pre_case = function()
-      child.restart { "-u", "scripts/minimal_init.lua", }
+      child.restart { "-u", "scripts/minimal_init.lua" }
       child.bo.readonly = false
       child.o.lines = 20
       child.o.columns = 75
@@ -56,7 +59,7 @@ T["seek"]["cancel select with <Esc>"] = function()
   MiniTest.expect.reference_screenshot(child.get_screenshot())
 
   child.lua [[vim.schedule(function() M.seek {} end)]]
-  child.type_keys { "c", "<Esc>", }
+  child.type_keys { "c", "<Esc>" }
   MiniTest.expect.reference_screenshot(child.get_screenshot())
 end
 T["seek"]["cancel select with <C-c>"] = function()
@@ -66,7 +69,7 @@ T["seek"]["cancel select with <C-c>"] = function()
   MiniTest.expect.reference_screenshot(child.get_screenshot())
 
   child.lua [[vim.schedule(function() M.seek {} end)]]
-  child.type_keys { "c", "<C-c>", }
+  child.type_keys { "c", "<C-c>" }
   MiniTest.expect.reference_screenshot(child.get_screenshot())
 end
 
@@ -193,6 +196,97 @@ T["seek"]["forwards"]["single match"] = function()
   child.lua [[vim.schedule(function() M.seek { direction = "forwards" } end)]]
   child.type_keys "lo"
   expect_cursor(4, 2, "local escape = 27")
+end
+
+T["visible-range boundaries"] = MiniTest.new_set()
+T["visible-range boundaries"]["default search excludes matches below the window"] = function()
+  child.cmd "resize 8"
+  child.api.nvim_buf_set_lines(0, 0, -1, true, {
+    "start",
+    "plain",
+    "zz inside",
+    "plain",
+    "plain",
+    "plain",
+    "plain",
+    "plain",
+    "plain",
+    "zz outside",
+  })
+  child.api.nvim_win_set_cursor(0, { 1, 0 })
+  child.lua [[vim.schedule(function() M.seek {} end)]]
+  child.type_keys "zz"
+  expect_cursor(3, 0, "zz inside")
+end
+T["visible-range boundaries"]["forward search excludes matches below the window"] = function()
+  child.cmd "resize 8"
+  child.api.nvim_buf_set_lines(0, 0, -1, true, {
+    "start",
+    "plain",
+    "zz inside",
+    "plain",
+    "plain",
+    "plain",
+    "plain",
+    "plain",
+    "plain",
+    "zz outside",
+  })
+  child.api.nvim_win_set_cursor(0, { 2, 0 })
+  child.lua [[vim.schedule(function() M.seek { direction = "forwards" } end)]]
+  child.type_keys "zz"
+  expect_cursor(3, 0, "zz inside")
+end
+T["visible-range boundaries"]["backward search excludes matches below the window"] = function()
+  child.cmd "resize 8"
+  child.api.nvim_buf_set_lines(0, 0, -1, true, {
+    "start",
+    "zz inside",
+    "plain",
+    "plain",
+    "plain",
+    "plain",
+    "plain",
+    "plain",
+    "plain",
+    "zz outside",
+  })
+  child.api.nvim_win_set_cursor(0, { 4, 0 })
+  child.lua [[vim.schedule(function() M.seek { direction = "backwards" } end)]]
+  child.type_keys "zz"
+  expect_cursor(2, 0, "zz inside")
+end
+
+T["closed folds"] = MiniTest.new_set()
+T["closed folds"]["ignores folded matches and selects a visible match"] = function()
+  child.api.nvim_buf_set_lines(0, 0, -1, true, {
+    "start",
+    "zz folded",
+    "inside fold",
+    "zz visible",
+  })
+  child.cmd "setlocal foldmethod=manual"
+  child.cmd "2,3fold"
+  child.api.nvim_win_set_cursor(0, { 1, 0 })
+  child.lua [[vim.schedule(function() M.seek {} end)]]
+  child.type_keys "zz"
+  expect_cursor(4, 0, "zz visible")
+end
+
+T["setup"] = MiniTest.new_set()
+T["setup"]["sets the label highlight and is idempotent"] = function()
+  child.g.seek_setup_called = false
+  child.api.nvim_set_hl(0, "SeekLabel", {})
+  child.lua [[M.setup()]]
+  MiniTest.expect.equality(child.api.nvim_get_hl(0, { name = "SeekLabel", link = true }), {
+    link = "Search",
+  })
+
+  child.api.nvim_set_hl(0, "SeekLabel", { link = "WarningMsg" })
+  child.lua [[M.setup()]]
+  MiniTest.expect.equality(child.api.nvim_get_hl(0, { name = "SeekLabel", link = true }), {
+    link = "WarningMsg",
+  })
 end
 
 return T

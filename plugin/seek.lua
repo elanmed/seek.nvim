@@ -1,1 +1,1 @@
-require "seek".setup()
+require("seek").setup()

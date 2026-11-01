@@ -1,4 +1,5 @@
-require("mini.test").setup()
+local MiniTest = require "mini.test"
+MiniTest.setup()
 
 local child = MiniTest.new_child_neovim()
 

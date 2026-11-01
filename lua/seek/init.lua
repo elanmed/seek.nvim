@@ -7,6 +7,9 @@ local get_key = function()
   if char == escape then
     return { type = "error", char = nil }
   end
+  if type(char) == "string" then
+    return { type = "success", char = char }
+  end
   return { type = "success", char = vim.fn.nr2char(char) }
 end
 

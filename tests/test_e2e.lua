@@ -292,22 +292,27 @@ T["closed folds"]["ignores folded matches and selects a visible match"] = functi
 end
 
 T["setup"] = MiniTest.new_set()
-T["setup"]["sets the label highlight and is idempotent"] = function()
-  child.g.seek_setup_called = false
+T["setup"]["sets the label highlight and is idempotent across reloads"] = function()
+  child.lua [[package.loaded.seek = nil]]
+  child.lua [[M = require "seek"]]
   child.api.nvim_set_hl(0, "SeekLabel", {})
-  child.lua_func(function()
-    M.setup()
-  end)
+  child.lua [[M.setup()]]
   MiniTest.expect.equality(child.api.nvim_get_hl(0, { name = "SeekLabel", link = true }), {
     link = "Search",
   })
 
   child.api.nvim_set_hl(0, "SeekLabel", { link = "WarningMsg" })
-  child.lua_func(function()
-    M.setup()
-  end)
+  child.lua [[M.setup()]]
   MiniTest.expect.equality(child.api.nvim_get_hl(0, { name = "SeekLabel", link = true }), {
     link = "WarningMsg",
+  })
+
+  child.api.nvim_set_hl(0, "SeekLabel", {})
+  child.lua [[package.loaded.seek = nil]]
+  child.lua [[M = require "seek"]]
+  child.lua [[M.setup()]]
+  MiniTest.expect.equality(child.api.nvim_get_hl(0, { name = "SeekLabel", link = true }), {
+    link = "Search",
   })
 end
 

@@ -218,12 +218,12 @@ M.seek = function(opts)
   end)
 end
 
-vim.g.seek_setup_called = false
+local setup_called = false
 M.setup = function()
-  if vim.g.seek_setup_called then
+  if setup_called then
     return
   end
-  vim.g.seek_setup_called = true
+  setup_called = true
 
   vim.api.nvim_set_hl(0, "SeekLabel", { link = "Search" })
 end

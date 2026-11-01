@@ -111,19 +111,30 @@ M.seek = function(opts)
   end)()
 
   for line_idx_1i, line in ipairs(lines) do
-    local is_fold_closed = vim.fn.foldclosed(line_idx_1i) ~= -1
+    local row_0i = (function()
+      local line_idx_0i = line_idx_1i - 1
+
+      if opts.direction == "forwards" then
+        return curr_line_0i + line_idx_0i
+      elseif opts.direction == "backwards" then
+        return curr_line_0i - line_idx_0i
+      else
+        return top_line_0i + line_idx_0i
+      end
+    end)()
+    local row_1i = row_0i + 1
+
+    local is_fold_closed = vim.fn.foldclosed(row_1i) ~= -1
     if is_fold_closed then
       goto for_continue
     end
 
-    local line_idx_0i = line_idx_1i - 1
     if should_lowercase(case_type, keys) then
       line = line:lower()
     end
 
     local col_idx_1i = 1
     while true do
-      local row_0i
       local label_col_1i
       local label_col_0i
       local label
@@ -133,16 +144,6 @@ M.seek = function(opts)
       if not match_start_col_1i then
         break
       end
-
-      row_0i = (function()
-        if opts.direction == "forwards" then
-          return curr_line_0i + line_idx_0i
-        elseif opts.direction == "backwards" then
-          return curr_line_0i - line_idx_0i
-        else
-          return top_line_0i + line_idx_0i
-        end
-      end)()
 
       if row_0i == curr_line_0i then
         if match_start_col_1i == cursor_col_1i then
@@ -154,6 +155,12 @@ M.seek = function(opts)
         if opts.direction == "forwards" and match_start_col_1i < cursor_col_1i then
           goto while_continue
         end
+      end
+
+      if #matches == #labels then
+        notify(vim.log.levels.WARN, "Too many matches (maximum %d)", #labels)
+        vim.api.nvim_buf_clear_namespace(0, ns_id, 0, -1)
+        return
       end
 
       label_col_1i = match_start_col_1i + 2

@@ -291,6 +291,88 @@ T["closed folds"]["ignores folded matches and selects a visible match"] = functi
   expect_cursor(4, 0, "zz visible")
 end
 
+T["closed folds"]["forward search from a later row skips folded matches"] = function()
+  child.api.nvim_buf_set_lines(0, 0, -1, true, {
+    "start",
+    "cursor",
+    "plain",
+    "plain",
+    "zz folded",
+    "inside fold",
+    "plain",
+    "zz visible",
+  })
+  child.cmd "setlocal foldmethod=manual"
+  child.cmd "5,6fold"
+  child.api.nvim_win_set_cursor(0, { 2, 0 })
+  start_seek { direction = "forwards" }
+  child.type_keys "zz"
+  expect_cursor(8, 0, "zz visible")
+end
+T["closed folds"]["backward search from a later row skips folded matches"] = function()
+  child.api.nvim_buf_set_lines(0, 0, -1, true, {
+    "plain",
+    "zz visible",
+    "zz folded",
+    "inside fold",
+    "plain",
+    "plain",
+    "plain",
+    "cursor",
+  })
+  child.cmd "setlocal foldmethod=manual"
+  child.cmd "3,4fold"
+  child.api.nvim_win_set_cursor(0, { 8, 0 })
+  start_seek { direction = "backwards" }
+  child.type_keys "zz"
+  expect_cursor(2, 0, "zz visible")
+end
+T["closed folds"]["default search from a scrolled view skips folded matches"] = function()
+  local lines = {}
+  for row = 1, 30 do
+    lines[row] = "plain"
+  end
+  lines[22] = "zz folded"
+  lines[23] = "inside fold"
+  lines[25] = "zz visible"
+  child.api.nvim_buf_set_lines(0, 0, -1, true, lines)
+  child.cmd "setlocal foldmethod=manual"
+  child.cmd "22,23fold"
+  child.api.nvim_win_set_cursor(0, { 20, 0 })
+  child.cmd "normal! zt"
+  start_seek {}
+  child.type_keys "zz"
+  expect_cursor(25, 0, "zz visible")
+end
+
+T["match limit"] = MiniTest.new_set()
+T["match limit"]["warns without creating labels beyond capacity"] = function()
+  child.api.nvim_buf_set_lines(0, 0, -1, true, { string.rep("zz ", 56) })
+  child.api.nvim_win_set_cursor(0, { 1, 0 })
+  child.lua_func(function()
+    _G.seek_notifications = {}
+    _G.seek_getchar_calls = 0
+    rawset(vim, "notify", function(message, level)
+      table.insert(_G.seek_notifications, { message = message, level = level })
+    end)
+    rawset(vim.fn, "getchar", function()
+      _G.seek_getchar_calls = _G.seek_getchar_calls + 1
+      return string.byte "z"
+    end)
+  end)
+  child.lua [[M.seek()]]
+  MiniTest.expect.equality(child.lua_get "_G.seek_notifications", {
+    { message = "[seek.nvim]: Listening ...", level = 2 },
+    { message = "[seek.nvim]: Too many matches (maximum 54)", level = 3 },
+  })
+  MiniTest.expect.equality(child.lua_get "_G.seek_getchar_calls", 2)
+  MiniTest.expect.equality(child.api.nvim_win_get_cursor(0), { 1, 0 })
+  MiniTest.expect.equality(
+    child.lua_get [[vim.api.nvim_buf_get_extmarks(0, vim.api.nvim_get_namespaces().Seek, 0, -1, {})]],
+    {}
+  )
+end
+
 T["setup"] = MiniTest.new_set()
 T["setup"]["sets the label highlight and is idempotent across reloads"] = function()
   child.lua [[package.loaded.seek = nil]]
